@@ -140,20 +140,20 @@ do ->
           stream.write "\n      "
           stream.write "++ " unless idx is 0
           stream.write "(self.nativeDeps.\"#{escapeNixString names[idx]}\" or [])"
-        stream.write ";\n    deps = {"
+        stream.write ";\n    deps = ["
         seenDeps = {}
         addDep = (nm, spc) ->
           unless seenDeps[nm]
             spc = spc.version if spc instanceof Object
             if spc is 'latest' or spc is ''
               spc = '*'
-            stream.write "\n      \"#{escapeNixString nm}-#{packageSet[nm][spc].version}\" = self.by-version.\"#{escapeNixString nm}\".\"#{packageSet[nm][spc].version}\";"
+            stream.write "\n      self.by-version.\"#{escapeNixString nm}\".\"#{packageSet[nm][spc].version}\""
           seenDeps[nm] = true
 
         for idx in [0..count]
           addDep nm, spc for nm, spc of pkg.scc[idx].dependencies or {}
           addDep nm, spc for nm, spc of pkg.scc[idx].optionalDependencies or {} when includeOptional(nm)
-        stream.write "\n    };\n    peerDependencies = ["
+        stream.write "\n    ];\n    peerDependencies = ["
         for idx in [0..count]
           for nm, spc of pkg.scc[idx].peerDependencies or {}
             unless seenDeps[nm] or cycleDeps[nm]
